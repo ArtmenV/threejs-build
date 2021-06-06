@@ -12,16 +12,41 @@ const camera = new THREE.PerspectiveCamera(
 
 const renderer = new THREE.WebGLRenderer()
 renderer.setSize(innerWidth, innerHeight)
+renderer.setPixelRatio(devicePixelRatio)
 
 document.body.appendChild(renderer.domElement)
 
-const boxGeometry = new THREE.BoxGeometry(
-  15, 15, 15,
+camera.position.z = 5
+
+const planeGeometry = new THREE.PlaneGeometry(5, 5, 10, 10)
+const planeMaterial = new THREE.MeshPhongMaterial({
+  color: 0xff0000,
+  side: THREE.DoubleSide
+})
+const planeMesh = new THREE.Mesh(planeGeometry, planeMaterial)
+scene.add(planeMesh)
+
+const {array} = planeMesh.geometry.attributes.position
+
+for (let index = 0; index < array.length; index += 3) {
+  console.log(array[index]);
+  const x = array[index]
+  const y = array[index + 1]
+  const z = array[index + 2]
+
+  array[index + 2] = z + Math.random() * 1
+}
+
+const light = new THREE.DirectionalLight(
+  0xffffff, 1
 )
-const material = new THREE.MeshBasicMaterial({color: 0x00FF00})
+light.position.set(0, 0, 1)
+scene.add(light)
 
-const mesh = new THREE.Mesh(boxGeometry, material)
-scene.add(mesh)
-camera.position.z = 50
+function animate() {
+  requestAnimationFrame(animate)
+  renderer.render(scene, camera)
+  // planeMesh.rotation.x += 0.01
+}
 
-renderer.render(scene, camera)
+animate()
