@@ -1,14 +1,18 @@
 import './style.css'
 
 import * as THREE from 'https://cdn.skypack.dev/three@0.129.0';
+import { OrbitControls } from 'https://cdn.skypack.dev/three@0.129.0/examples/jsm/controls/OrbitControls';
 import * as dat from 'dat.gui';
 console.log(dat);
+console.log('orbit', OrbitControls);
 
 const gui = new dat.GUI()
 const world = {
   plane: {
     width: 10,
-    height: 10
+    height: 10,
+    widthSegments: 10,
+    heightSegments: 10,
   }
 }
 
@@ -18,13 +22,19 @@ gui.add(world.plane, 'width', 1, 20)
 gui.add(world.plane, 'height', 1, 20)
   .onChange(generatePlane)
 
+gui.add(world.plane, 'widthSegments', 1, 50)
+  .onChange(generatePlane)
+
+gui.add(world.plane, 'heightSegments', 1, 50)
+  .onChange(generatePlane)
+
 function generatePlane() {
   planeMesh.geometry.dispose()
   planeMesh.geometry = new THREE.PlaneGeometry(
     world.plane.width,
     world.plane.height, 
-    10, 
-    10
+    world.plane.widthSegments,
+    world.plane.heightSegments,
   )
   const {array} = planeMesh.geometry.attributes.position
 
@@ -48,8 +58,9 @@ const camera = new THREE.PerspectiveCamera(
 const renderer = new THREE.WebGLRenderer()
 renderer.setSize(innerWidth, innerHeight)
 renderer.setPixelRatio(devicePixelRatio)
-
 document.body.appendChild(renderer.domElement)
+
+new OrbitControls(camera, renderer.domElement)
 
 camera.position.z = 5
 
