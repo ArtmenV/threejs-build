@@ -1,6 +1,41 @@
 import './style.css'
 
 import * as THREE from 'https://cdn.skypack.dev/three@0.129.0';
+import * as dat from 'dat.gui';
+console.log(dat);
+
+const gui = new dat.GUI()
+const world = {
+  plane: {
+    width: 10,
+    height: 10
+  }
+}
+
+gui.add(world.plane, 'width', 1, 20)
+  .onChange(generatePlane)
+
+gui.add(world.plane, 'height', 1, 20)
+  .onChange(generatePlane)
+
+function generatePlane() {
+  planeMesh.geometry.dispose()
+  planeMesh.geometry = new THREE.PlaneGeometry(
+    world.plane.width,
+    world.plane.height, 
+    10, 
+    10
+  )
+  const {array} = planeMesh.geometry.attributes.position
+
+  for (let index = 0; index < array.length; index += 3) {
+    const x = array[index]
+    const y = array[index + 1]
+    const z = array[index + 2]
+
+    array[index + 2] = z + Math.random() * 1
+  }
+}
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
@@ -21,7 +56,8 @@ camera.position.z = 5
 const planeGeometry = new THREE.PlaneGeometry(5, 5, 10, 10)
 const planeMaterial = new THREE.MeshPhongMaterial({
   color: 0xff0000,
-  side: THREE.DoubleSide
+  side: THREE.DoubleSide,
+  flatShading: THREE.FlatShading
 })
 const planeMesh = new THREE.Mesh(planeGeometry, planeMaterial)
 scene.add(planeMesh)
@@ -29,7 +65,6 @@ scene.add(planeMesh)
 const {array} = planeMesh.geometry.attributes.position
 
 for (let index = 0; index < array.length; index += 3) {
-  console.log(array[index]);
   const x = array[index]
   const y = array[index + 1]
   const z = array[index + 2]
