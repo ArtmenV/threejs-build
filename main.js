@@ -8,20 +8,20 @@ import * as dat from 'dat.gui';
 const gui = new dat.GUI()
 const world = {
   plane: {
-    width: 29,
-    height: 29,
-    widthSegments: 25,
-    heightSegments: 25,
+    width: 500,
+    height: 500,
+    widthSegments: 60,
+    heightSegments: 60,
   }
 }
 
-gui.add(world.plane, 'width', 1, 70)
+gui.add(world.plane, 'width', 1, 700)
   .onChange(generatePlane)
 
-gui.add(world.plane, 'height', 1, 70)
+gui.add(world.plane, 'height', 1, 700)
   .onChange(generatePlane)
 
-gui.add(world.plane, 'widthSegments', 1, 50)
+gui.add(world.plane, 'widthSegments', 1, 120)
   .onChange(generatePlane)
 
 gui.add(world.plane, 'heightSegments', 1, 50)
@@ -72,7 +72,7 @@ document.body.appendChild(renderer.domElement)
 
 new OrbitControls(camera, renderer.domElement)
 
-camera.position.z = 5
+camera.position.z = 50
 
 const {
   width, 
@@ -99,9 +99,9 @@ for (let index = 0; index < array.length; index++) {
     const y = array[index + 1]
     const z = array[index + 2]
   
-    array[index] = x + (Math.random() - 0.5)
-    array[index + 1] = y + (Math.random() - 0.5)
-    array[index + 2] = z + Math.random() * 1
+    array[index] = x + (Math.random() - 0.5) * 8
+    array[index + 1] = y + (Math.random() - 0.5) * 8
+    array[index + 2] = z + (Math.random() - 0.5) * 8
   }
 
   randomValues.push(Math.random() - 0.5)
@@ -122,7 +122,7 @@ planeMesh.geometry.setAttribute(
 )
 
 const light = new THREE.DirectionalLight(0xffffff, 1)
-light.position.set(0, 0, 1)
+light.position.set(0, -1, 1)
 scene.add(light)
 
 const backLight = new THREE.DirectionalLight(0xffffff, 1)
