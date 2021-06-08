@@ -8,17 +8,17 @@ import * as dat from 'dat.gui';
 const gui = new dat.GUI()
 const world = {
   plane: {
-    width: 10,
-    height: 10,
-    widthSegments: 10,
-    heightSegments: 10,
+    width: 29,
+    height: 29,
+    widthSegments: 25,
+    heightSegments: 25,
   }
 }
 
-gui.add(world.plane, 'width', 1, 20)
+gui.add(world.plane, 'width', 1, 70)
   .onChange(generatePlane)
 
-gui.add(world.plane, 'height', 1, 20)
+gui.add(world.plane, 'height', 1, 70)
   .onChange(generatePlane)
 
 gui.add(world.plane, 'widthSegments', 1, 50)
@@ -44,6 +44,16 @@ function generatePlane() {
 
     array[index + 2] = z + Math.random() * 1
   }
+
+  const colors = []
+  for (let index = 0; index < count; index++) {
+    colors.push(0, 0.19, 0.4)
+  }
+
+  planeMesh.geometry.setAttribute(
+    'color', 
+    new THREE.BufferAttribute(new Float32Array(colors), 3)
+  )
 }
 
 const raycaster = new THREE.Raycaster()
@@ -64,7 +74,13 @@ new OrbitControls(camera, renderer.domElement)
 
 camera.position.z = 5
 
-const planeGeometry = new THREE.PlaneGeometry(5, 5, 10, 10)
+const {
+  width, 
+  height,
+  widthSegments,
+  heightSegments, 
+} = world.plane
+const planeGeometry = new THREE.PlaneGeometry(width, height, widthSegments, heightSegments)
 const planeMaterial = new THREE.MeshPhongMaterial({
   side: THREE.DoubleSide,
   flatShading: THREE.FlatShading,
@@ -73,16 +89,28 @@ const planeMaterial = new THREE.MeshPhongMaterial({
 const planeMesh = new THREE.Mesh(planeGeometry, planeMaterial)
 scene.add(planeMesh)
 
+//vertice position randomizations
 const {array, count} = planeMesh.geometry.attributes.position
+const randomValues = []
+for (let index = 0; index < array.length; index++) {
 
-for (let index = 0; index < array.length; index += 3) {
-  const x = array[index]
-  const y = array[index + 1]
-  const z = array[index + 2]
+  if (index % 3 === 0) {
+    const x = array[index]
+    const y = array[index + 1]
+    const z = array[index + 2]
+  
+    array[index] = x + (Math.random() - 0.5)
+    array[index + 1] = y + (Math.random() - 0.5)
+    array[index + 2] = z + Math.random() * 1
+  }
 
-  array[index + 2] = z + Math.random() * 1
+  randomValues.push(Math.random() - 0.5)
 }
 
+planeMesh.geometry.attributes.position.randomValues = randomValues
+planeMesh.geometry.attributes.position.originalPosition = array
+
+// color attribute addition
 const colors = []
 for (let index = 0; index < count; index++) {
   colors.push(0, 0.19, 0.4)
@@ -106,12 +134,23 @@ const mouse = {
   y: null,
 }
 
+let frame = 0
 function animate() {
   requestAnimationFrame(animate)
   renderer.render(scene, camera)
 
   raycaster.setFromCamera(mouse, camera)
   const intersects = raycaster.intersectObject(planeMesh)
+  frame += 0.01
+
+  const {array, originalPosition, randomValues} = planeMesh.geometry.attributes.position
+
+  for (let index = 0; index < array.length; index += 3) {
+    array[index] = originalPosition[index] + Math.cos(frame + randomValues[index]) * 0.005
+    array[index + 1] = originalPosition[index + 1] + Math.sin(frame + randomValues[index + 1]) * 0.005
+  }
+
+  planeMesh.geometry.attributes.position.needsUpdate = true
 
   if (intersects.length > 0) {
     const { color } = intersects[0].object.geometry.attributes
